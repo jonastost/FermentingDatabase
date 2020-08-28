@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewpoint" content="width=device-width, initial-scale=1.0">
+<title>
+Fermentation Monitor
+</title>
+<style>
+.header {
+  background-color: red;
+  
+}
+</style>
+<script>
+function access_data(str, target, recipestr) {
+  if(str.length == 0) {
+    document.getElementById(target).innerHTML = "The called string was empty.";
+    return;
+  } else {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+      if(this.readyState == 4 && this.status == 200) {
+        document.getElementById(target).innerHTML = this.responseText;
+      }
+    };
+    //xmlhttp.open("GET", "ferment_sql.php?q=" + str + "&recipe=" + recipe_str, true);
+    xmlhttp.open("GET", "test_php.php?str="+str+"&recipestr="+recipestr, true);
+    xmlhttp.send();
+  }
+}
+</script>
+</head>
+<body>
+<h1 class="header">
+Fermentation Project
+</h1>
+
+<p>
+Use the form below to view current information on the fermentation process.
+</p>
+<div>
+	<div>
+		<p>
+		If the field is not needed, simply enter 'none'.
+		</p>
+	</div>
+	<form onsubmit="access_data('create_new','new', Name.value + ',' + type.value + ',' + grain1.value + ',' + grain2.value + ',' + grain3.value + ',' + grain4.value + ',' + grain5.value + ',' + hop1.value + ',' + hop2.value + ',' + hop3.value + ',' + hop4.value + ',' + hop5.value + ',' + time1.value + ',' + time2.value + ',' + time3.value + ',' + time4.value + ',' + time5.value + ',' + yeast.value + ',' + timefr.value); return false;">
+	  <label for="Name">Name</label><br>
+	  <input type="text" name="Name" id="Name"><br><br>
+	  <label for="type">Type</label><br>
+	  <input type="text" name="type" id="type"><br><br>
+	  <label for="grain1">Grains</label><br>
+	  <input type="text" name="grain1" id="grain1">
+          <input type="text" name="grain2" id="grain2">
+	  <input type="text" name="grain3" id="grain3">
+	  <input type="text" name="grain4" id="grain4">
+	  <input type="text" name="grain5" id="grain5"><br><br>
+	  <label for="hop1">Hops</label><br>
+	  <input type="text" name="hop1" id="hop1">
+	  <input type="text" name="hop2" id="hop2">
+	  <input type="text" name="hop3" id="hop3">
+	  <input type="text" name="hop4" id="hop4">
+	  <input type="text" name="hop5" id="hop5"><br><br>
+	  <label for="time1">Hops Times</label><br>
+	  <input type="text" name="time1" id="time1">
+	  <input type="text" name="time2" id="time2">
+	  <input type="text" name="time3" id="time3">
+	  <input type="text" name="time4" id="time4">
+	  <input type="text" name="time5" id="time5"><br><br>
+	  <label for="yeast">Yeast</label><br>
+	  <input type="text" name="yeast" id="yeast"><br><br>
+	  <input type="radio" name="timefr" id="time" value="time">
+	  <label for="time">With MuBit?</label><br><br>
+	  <input type="radio" name="timefr" id="fridge" value="fridge">
+	  <label for="fridge">With MuBit and Fridge?</label><br><br>
+	  <input type="radio" name="timefr" id="none" value="none">
+	  <label for="none">None</label><br><br>
+	  <input type="submit" value="Submit">
+	</form>
+	<div id="new"></div>
+</div>
+
+<h2 class="header">
+Currently In Progress
+</h2>
+
+<div>
+	<button type="button" onclick="access_data('get_current', 'current', 'null')">
+	Refresh Current Data
+	</button>
+        <div><br></div>
+	<div id="current"></div>
+</div>
+
+<h2 class="header">
+Past Brews
+</h2>
+<div>
+	<button type="button" onclick="access_data('get_past', 'past', 'null')">
+	Refresh Past Data
+	</button>
+        <div><br></div>
+	<div id="past"></div>
+</div>
+
+</body>
+</html>
