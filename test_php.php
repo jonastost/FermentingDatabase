@@ -117,7 +117,8 @@ function openTable() {
   echo "<th>Times</th>";
   echo "<th>Yeast</th>";
   echo "<th>Start Time</th>";
-  echo "<th>Time Brewing</th>";
+  echo "<th>Time Brewing (s)</th>";
+  echo "<th>Rating (10-100)</th>";
   echo "</tr>";
   return;
 }
@@ -126,24 +127,36 @@ function closeTable() {
   return;
 }
 function findBrew($brew_name_time, $sql) {
-  $find = "SELECT name, type, yeast FROM ".$brew_name_time;
+  $find = "SELECT name, type, yeast, rating FROM ".$brew_name_time;
   $find2 = "SELECT grains, hops, hops_times FROM ".$brew_name_time;
-  if ($result=$sql->query($find) && $result2=$sql->query($find2)) {
-    $result = $sql->query($find);
-    $name = $yeast = $type = "";
+  $find3 = "SELECT time FROM ".$brew_name_time."_data ORDER BY row DESC LIMIT 1";
+  $find4 = "SELECT timestamp FROM ".$brew_name_time."_data LIMIT 1";
+  if ($result=$sql->query($find) && $result2=$sql->query($find2) && $result3=$sql->query($find3) && $result4=$sql->query($find4)) {
+  $result=$sql->query($find);
+  $name = $yeast = $type = $rating = "";
     while ($row = mysqli_fetch_row($result)) {
       $name .= $row[0];
       $type .= $row[1];
       $yeast .= $row[2];
+      $rating .= $row[3];
     }
     if ($name == "") {
       echo "yes";
     }
+    $result2=$sql->query($find2);
     $grain_str = $hops_str = $times_str = "";
     while ($row2=mysqli_fetch_row($result2)) {
       $grain_str .= $row2[0]."<br>";
       $hops_str .= $row2[1]."<br>";
       $times_str .= $row2[2]."<br>";
+    }
+    $result3=$sql->query($find3);
+    $time_str = $timestamp_str = "";
+    while ($row3=mysqli_fetch_row($result3)) {
+      $time_str .= $row3[0]."<br>";
+    }
+    while ($row4=mysqli_fetch_row($result4)) {
+      $timestamp_str .= $row4[0]."<br>";
     }
     echo "<tr>";
     echo "<td>".$name."</td>";
@@ -152,8 +165,9 @@ function findBrew($brew_name_time, $sql) {
     echo "<td>".$hops_str."</td>";
     echo "<td>".$times_str."</td>";
     echo "<td>".$yeast."</td>";
-    echo "<td>"."</td>";
-    echo "<td>"."</td>";
+    echo "<td>".$timestamp_str."</td>";
+    echo "<td>".$time_str."</td>";
+    echo "<td>".$rating."</td>";
     echo "</tr>";
   } else {
     echo "This brew does not exist. Check the name and time.";
