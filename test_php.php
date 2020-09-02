@@ -13,6 +13,7 @@ table, td, th {
 }
 th {
   text-align: left;
+  background-color:grey;
 }
 </style>
 </head>
@@ -30,7 +31,7 @@ if (!$sql) {
 }
 function new_brewdata_table($brew_name_time, $mode, $sql) {
   if ($mode == "fridge" or $mode == "time") {
-    $table = "CREATE TABLE " . $brew_name_time."_data (time VARCHAR(255), timestamp VARCHAR(255), current_temp INT, average_temp INT, row INT)";
+    $table = "CREATE TABLE " . $brew_name_time."_data (time VARCHAR(255), timestamp VARCHAR(255), current_temp INT, average_temp FLOAT, row INT)";
   } else {
     $table = "CREATE TABLE ".$brew_name_time."_data (time VARCHAR(255), timestamp VARCHAR(255), row INT)";
   }
@@ -56,7 +57,6 @@ function new_brewinfo_table($brew_name, $brew_type, $done, $rating, $bottled, $g
   } catch (Exception $e) {
     echo "There was an error in creating the tables";
   }
-  echo strval($brew_time);
   $brew_name_time = $brew_name."_".strval($brew_time);
   $success = new_brewdata_table($brew_name_time, $modes, $sql);
   $brew_name_time_q = quoted($brew_name_time);
@@ -98,7 +98,6 @@ function newbrew($brew_name, $brew_type, $grains, $hops, $hops_times, $yeast, $m
     if (!$success) {
       echo "There was a problem creating the tables, but no exceptions were thrown. <br>";
     } else {
-      echo "The tables were created. Update the tables below to see changes";
       return true;
     }
   } catch (Exception $e) {
@@ -118,6 +117,7 @@ function openTable() {
   echo "<th>Yeast</th>";
   echo "<th>Start Time</th>";
   echo "<th>Time Brewing (s)</th>";
+  echo "<th>Average Temperature (C)</th>";
   echo "<th>Rating (10-100)</th>";
   echo "</tr>";
   return;
@@ -129,7 +129,7 @@ function closeTable() {
 function findBrew($brew_name_time, $sql) {
   $find = "SELECT name, type, yeast, rating FROM ".$brew_name_time;
   $find2 = "SELECT grains, hops, hops_times FROM ".$brew_name_time;
-  $find3 = "SELECT time FROM ".$brew_name_time."_data ORDER BY row DESC LIMIT 1";
+  $find3 = "SELECT time, average_temp FROM ".$brew_name_time."_data ORDER BY row DESC LIMIT 1";
   $find4 = "SELECT timestamp FROM ".$brew_name_time."_data LIMIT 1";
   if ($result=$sql->query($find) && $result2=$sql->query($find2) && $result3=$sql->query($find3) && $result4=$sql->query($find4)) {
   $result=$sql->query($find);
@@ -140,9 +140,6 @@ function findBrew($brew_name_time, $sql) {
       $yeast .= $row[2];
       $rating .= $row[3];
     }
-    if ($name == "") {
-      echo "yes";
-    }
     $result2=$sql->query($find2);
     $grain_str = $hops_str = $times_str = "";
     while ($row2=mysqli_fetch_row($result2)) {
@@ -151,9 +148,10 @@ function findBrew($brew_name_time, $sql) {
       $times_str .= $row2[2]."<br>";
     }
     $result3=$sql->query($find3);
-    $time_str = $timestamp_str = "";
+    $time_str = $timestamp_str = $temp_str = "";
     while ($row3=mysqli_fetch_row($result3)) {
       $time_str .= $row3[0]."<br>";
+      $temp_str .= $row3[1]."<br>";
     }
     while ($row4=mysqli_fetch_row($result4)) {
       $timestamp_str .= $row4[0]."<br>";
@@ -167,6 +165,7 @@ function findBrew($brew_name_time, $sql) {
     echo "<td>".$yeast."</td>";
     echo "<td>".$timestamp_str."</td>";
     echo "<td>".$time_str."</td>";
+    echo "<td>".$temp_str."</td>";
     echo "<td>".$rating."</td>";
     echo "</tr>";
   } else {
@@ -229,11 +228,9 @@ if($str == "get_current") {
 } else if ($str == "get_past") {
   pastbrews($sql);
 } else if ($str == "create_new") {
-  echo $recipe_str;
   $ar = parse_recipe_str($recipe_str);
   if($ar[2] != "n") {
     try {
-      echo $ar[17];
       $grain = array($ar[2], $ar[3], $ar[4], $ar[5], $ar[6]);
       $hops = array($ar[7], $ar[8], $ar[9], $ar[10], $ar[11]);
       $times = array($ar[12], $ar[13], $ar[14], $ar[15], $ar[16]);
